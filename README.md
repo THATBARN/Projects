@@ -6,7 +6,7 @@
 
         python3 -m venv venv
         source venv/bin/activate
-        pip install selenium pyTelegramBotAPI
+        pip install -r requirements.txt
 
 2. Chromedriver
 
@@ -17,5 +17,3 @@
 4. Telegram Bot Token
 
 5. VoIP Blazer login/password
-
-
