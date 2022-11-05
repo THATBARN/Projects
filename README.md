@@ -4,9 +4,9 @@
 
 1. Python Virtual Environment
 
-    python3 -m venv venv
-    source venv/bin/activate
-    pip install selenium pyTelegramBotAPI
+        python3 -m venv venv
+        source venv/bin/activate
+        pip install selenium pyTelegramBotAPI
 
 2. Chromedriver
 
