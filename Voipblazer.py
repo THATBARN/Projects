@@ -5,10 +5,12 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
+import os
+
 import telebot
 
 
-env_conf = dotenv_values(".env")
+env_conf = dotenv_values(os.path.abspath(os.path.dirname(__file__)) + "/.env")
 
 options = Options()
 options.headless = True
