@@ -6,7 +6,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 import os
-
 import telebot
 
 
@@ -26,7 +25,7 @@ for element in elements:
         login = element
         break
 if login is None:
-    print("Could not find the login form, exiting...")
+    print("VoIP Blazer: could not find the login form, exiting...")
     exit(0)
 
 login.find_element(
@@ -37,7 +36,7 @@ login.find_element(
     By.XPATH, 'div[2]/form/table/tbody/tr[5]/td[2]/input').send_keys(Keys.ENTER)
 
 balance = driver.find_element(By.CLASS_NAME, "balance").text
-print("The current balance: " + balance)
+print("VoIP Blazer Balance: " + balance)
 
 if float(balance.replace("€ ", "").replace(",", "")) <= 700:
     alert = "<b>ALERT!</b>\nThe VoIP balance is low: {0}".format(balance)
