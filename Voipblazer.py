@@ -38,7 +38,7 @@ login.find_element(
 balance = driver.find_element(By.CLASS_NAME, "balance").text
 print("VoIP Blazer Balance: " + balance)
 
-if float(balance.replace("€ ", "").replace(",", "")) <= 700:
+if float(balance.replace("€ ", "").replace(",", "")) <= 1000:
     alert = "<b>ALERT!</b>\nThe VoIP balance is low: {0}".format(balance)
     bot = telebot.TeleBot(env_conf.get("TELEGRAM_BOT_TOKEN"))
     bot.send_message(chat_id=env_conf.get("TELEGRAM_CHAT_ID"),
