@@ -41,6 +41,7 @@ balance = driver.find_element(
     By.XPATH, '//*[@id="scroller"]/table/tbody/tr[3]/td/span')
 balance = balance.get_attribute('textContent')
 print("THiS Card Balance: ￦{0}".format(balance))
+driver.quit()
 
 if float(balance.replace(",", "")) <= 500000:
     alert = "<b>ALERT!</b>\nCK (디스카드) balance is low: ￦{0}".format(balance)
