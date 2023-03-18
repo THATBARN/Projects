@@ -37,19 +37,20 @@ login.find_element(
     By.XPATH, 'div[2]/form/table/tbody/tr[5]/td[2]/input').send_keys(Keys.ENTER)
 
 current_balance = driver.find_element(By.CLASS_NAME, "balance").text
-print("VoIP Blazer Balance: ￦{0}".format(current_balance))
+print("VoIP Blazer Balance: {0}".format(current_balance))
 
-file = open(".voippickle", 'rb')
-pickled_list = pickle.load(file)
 try:
+    file = open(".voippickle", 'rb')
+    pickled_list = pickle.load(file)
     message_status = pickled_list[1]
     previous_balance = pickled_list[0]
-except TypeError:
-    print("Cannot find the pickled data.")
-    exit(0)
+except Exception as e:
+    print("Cannot load the pickled data:", e)
+    message_status = False
+    previous_balance = current_balance
 
 def send_alert():
-    alert = "<b>ALERT!</b>\nVoIP balance is low: ￦{0}".format(current_balance)
+    alert = "<b>ALERT!</b>\nVoIP balance is low: {0}".format(current_balance)
     bot = telebot.TeleBot(env_conf.get("TELEGRAM_BOT_TOKEN"))
     bot.send_message(chat_id=env_conf.get("TELEGRAM_CHAT_ID"),
                  parse_mode="HTML",
@@ -64,7 +65,7 @@ def dump_data(current_balance, message_status):
     file = open('.voippickle', 'wb')
     pickle.dump(data, file)
 
-previous_balance = float(previous_balance.replace(",", "").replace("€ ", ""))
+previous_balance_int = float(previous_balance.replace(",", "").replace("€ ", ""))
 current_balance_int = float(current_balance.replace(",", "").replace("€ ", ""))
 
 if current_balance_int >= 1500:
@@ -74,7 +75,7 @@ if current_balance_int >= 1500:
     exit(0)
 
 if message_status == True:
-    if previous_balance - 500 < current_balance_int:
+    if previous_balance_int - 500 < current_balance_int:
         print("The alert has already been sent.")
         exit(0)
     else:
