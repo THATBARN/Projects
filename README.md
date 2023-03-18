@@ -1,4 +1,4 @@
-# VoIP Blazer balance checker
+# Balance Checker
 
 ## Requirements
 
@@ -12,6 +12,6 @@
 
 3. Cron Job.
 
-4. Telegram Bot Token.
+4. Telegram Bot Token and Chat ID.
 
-5. Credentials for VoIP Blazer and PDS.
+5. Credentials.

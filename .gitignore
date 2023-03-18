@@ -3,3 +3,5 @@ venv
 .vscode/*
 !.vscode/settings.json
 logs
+.DS_Store
+.voippickle

@@ -1,5 +1,6 @@
 from dotenv import dotenv_values
 
+import pickle
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -35,13 +36,55 @@ login.find_element(
 login.find_element(
     By.XPATH, 'div[2]/form/table/tbody/tr[5]/td[2]/input').send_keys(Keys.ENTER)
 
-balance = driver.find_element(By.CLASS_NAME, "balance").text
-print("VoIP Blazer Balance: " + balance)
+current_balance = driver.find_element(By.CLASS_NAME, "balance").text
+print("VoIP Blazer Balance: ￦{0}".format(current_balance))
 
-if float(balance.replace("€ ", "").replace(",", "")) <= 1000:
-    alert = "<b>ALERT!</b>\nThe VoIP balance is low: {0}".format(balance)
+file = open(".voippickle", 'rb')
+pickled_list = pickle.load(file)
+try:
+    message_status = pickled_list[1]
+    previous_balance = pickled_list[0]
+except TypeError:
+    print("Cannot find the pickled data.")
+    exit(0)
+
+def send_alert():
+    alert = "<b>ALERT!</b>\nVoIP balance is low: ￦{0}".format(current_balance)
     bot = telebot.TeleBot(env_conf.get("TELEGRAM_BOT_TOKEN"))
     bot.send_message(chat_id=env_conf.get("TELEGRAM_CHAT_ID"),
-                     parse_mode="HTML",
-                     disable_notification=True,
-                     text=alert)
+                 parse_mode="HTML",
+                 disable_notification=True,
+                 text=alert)
+
+def dump_data(current_balance, message_status):
+    data = []
+    data.append(current_balance)
+    data.append(message_status)
+    print(data)
+    file = open('.voippickle', 'wb')
+    pickle.dump(data, file)
+
+previous_balance = float(previous_balance.replace(",", "").replace("€ ", ""))
+current_balance_int = float(current_balance.replace(",", "").replace("€ ", ""))
+
+if current_balance_int >= 1500:
+    message_status = False
+    dump_data(current_balance, message_status)
+    print("Current balance is greater than 1,500.")
+    exit(0)
+
+if message_status == True:
+    if previous_balance - 500 < current_balance_int:
+        print("The alert has already been sent.")
+        exit(0)
+    else:
+        send_alert()
+        dump_data(current_balance, message_status)
+        print("We have resent the alert")
+        exit(0)
+
+send_alert()
+message_status = True
+dump_data(current_balance, message_status)
+print("We have sent an alert, as the current balance is less than 1,500.")
+exit(0)
