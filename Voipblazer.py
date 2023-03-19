@@ -27,7 +27,7 @@ for element in elements:
         break
 if login is None:
     print("VoIP Blazer: could not find the login form, exiting...")
-    exit(0)
+    exit(-1)
 
 login.find_element(
     By.XPATH, "div[2]/form/table/tbody/tr[1]/td[2]/input").send_keys(env_conf.get("VOIP_BLAZER_ID"))
@@ -77,15 +77,15 @@ if current_balance_int >= 1500:
 if message_status == True:
     if previous_balance_int - 500 < current_balance_int:
         print("The alert has already been sent.")
-        exit(0)
     else:
         send_alert()
         dump_data(current_balance, message_status)
-        print("We have resent the alert")
-        exit(0)
+        print("Resent the alert.")
+
+    exit(0)
 
 send_alert()
 message_status = True
 dump_data(current_balance, message_status)
-print("We have sent an alert, as the current balance is less than 1,500.")
+print("We have sent an alert, as the current balance is less than the threshold.")
 exit(0)
