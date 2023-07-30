@@ -4,6 +4,9 @@ from dotenv import dotenv_values
 import os
 
 from openpyxl import load_workbook
+import warnings
+warnings.simplefilter("ignore")
+
 import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -15,6 +18,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 env_conf = dotenv_values(os.path.abspath(os.path.dirname(__file__)) + "/.env")
 
+
 # # GET new order ids
 url = "https://admin.bozoraka.com/api/new-market-request-ids?sellerId=25"
 headers = {
@@ -24,21 +28,21 @@ headers = {
 response = requests.get(url, headers=headers)
 order_ids = response.text
 
-# # POST order ids to receive order excel file
+# # POST order ids and receive order excel file
 url = "https://admin.bozoraka.com/api/new-market-requests-excel"
 response = requests.post(url, data=order_ids, headers=headers)
 
 temp_file = env_conf.get("ORDER_FOLDER_PATH") + "/temp.xlsx"
 with open(temp_file, 'wb') as e:
-    e.write(response.content) # creates temporary file of order excel spreadsheet
+    e.write(response.content) # create temporary file of order excel spreadsheet
 
 # # Edit excel spreadsheet to remove duplicates...
-wb = load_workbook(filename=temp_file)
+wb = load_workbook(filename="/Users/salmondehkanov/Desktop/Github/Orders/test.xlsx")
 sheet = wb.active
 
 os.remove(env_conf.get("ORDER_FOLDER_PATH") + "/temp.xlsx") # delete temp file, as it is now unneeded
 
-# puts all the order numbers in list
+# # Put all order numbers in list
 column = sheet["A"]
 order_numbers = []
 for order in column:
@@ -46,30 +50,34 @@ for order in column:
     order_numbers.append(order)
 order_numbers.remove(None)
 
-# cycles through list to find dupes
+# # Cycle through list to find dupes
+
 dupe_orders = []
-for order in order_numbers:
-    if order.count("-") > 2: # finds order numbers with more than 2 dashes...
-        dupe_orders.append(order)
-        try:
-            dupe_orders.append(order[0:-2]) # ...then finds corresponding order
-        except ValueError:
-            continue # if not corresponding order, then ignore and continue (if there are three or more packages in one order)
+for num in order_numbers:
+    if num.count("-") > 2:
+        dupe_orders.append(num)
+        if num[0:-2] in order_numbers:
+            if num[0:-2] not in dupe_orders:
+                dupe_orders.append(num[0:-2])
+print(dupe_orders)
 
-# deletes dupe rows
-rows = list(sheet.rows)
-for i in range(len(rows)):
-    if rows[i][0].value in dupe_orders:
-        sheet.delete_rows(i)
+# # Delete dupe orders
+row = 1
+while row <= sheet.max_row:
+    if sheet.cell(row=row, column=1).value in dupe_orders:
+        sheet.delete_rows(row, 1)
+    else:
+        row += 1
 
 
+# # Set time and save file
 now = datetime.now()
 dt_string = "/" + now.strftime("%Y%m%d-%H%M") + ".xlsx" # datetime object containing current date and time
+
 wb.save(env_conf.get("ORDER_FOLDER_PATH") + dt_string)
 
 
-
-# # Upload file to ALPS...
+# # Upload file to ALPS
 options = Options()
 options.binary_location = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 options.headless = True
