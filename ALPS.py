@@ -2,7 +2,7 @@ import requests
 from datetime import datetime
 from dotenv import dotenv_values
 import os
-env_conf = dotenv_values(os.path.abspath(os.path.dirname(__file__)) + "/.env")
+
 from openpyxl import load_workbook
 import time
 from selenium import webdriver
@@ -13,15 +13,19 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
+env_conf = dotenv_values(os.path.abspath(os.path.dirname(__file__)) + "/.env")
+
 # # GET new order ids
 url = "https://admin.bozoraka.com/api/new-market-request-ids?sellerId=25"
-headers = {'Authorization': 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtYXJrZXQub3JkZXIuZXhwb3J0ZXIiLCJhdXRoIjoiUk9MRV9NQVJLRVRfTUFOQUdFUiIsImV4cCI6MTY5Mjc2MjM5MH0.xjnH9Y5idIhJplQATXMe5PAwp7ZlyAmCbYhwO7J246GfS7hSvuEw6Mdn-_owrLY2vBexWBRJhRxh0fqa8i4vJw'}
+headers = {
+    'Content-type': 'application/json',
+    'Authorization': env_conf.get("BOZORAKA_AUTH")
+}
 response = requests.get(url, headers=headers)
 order_ids = response.text
 
 # # POST order ids to receive order excel file
 url = "https://admin.bozoraka.com/api/new-market-requests-excel"
-headers = {'Content-type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtYXJrZXQub3JkZXIuZXhwb3J0ZXIiLCJhdXRoIjoiUk9MRV9NQVJLRVRfTUFOQUdFUiIsImV4cCI6MTY5Mjc2MjM5MH0.xjnH9Y5idIhJplQATXMe5PAwp7ZlyAmCbYhwO7J246GfS7hSvuEw6Mdn-_owrLY2vBexWBRJhRxh0fqa8i4vJw'}
 response = requests.post(url, data=order_ids, headers=headers)
 
 temp_file = env_conf.get("ORDER_FOLDER_PATH") + "/temp.xlsx"
@@ -108,5 +112,3 @@ file_upload = driver.find_element(
 file_upload.send_keys(env_conf.get("ORDER_FOLDER_PATH") + dt_string)
 
 time.sleep(5)
-
-
