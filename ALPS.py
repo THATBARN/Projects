@@ -37,13 +37,16 @@ with open(temp_file, 'wb') as e:
     e.write(response.content) # create temporary file of order excel spreadsheet
 
 # # Edit excel spreadsheet to remove duplicates...
-wb = load_workbook(filename="/Users/salmondehkanov/Desktop/Github/Orders/test.xlsx")
+wb = load_workbook(filename="/Users/salmondehkanov/Desktop/Github/Orders/temp.xlsx")
 sheet = wb.active
 
-os.remove(env_conf.get("ORDER_FOLDER_PATH") + "/temp.xlsx") # delete temp file, as it is now unneeded
+# Delete temp file, as it is now unneeded
+os.remove(env_conf.get("ORDER_FOLDER_PATH") + "/temp.xlsx") # deactivate this line of code to save raw order id file in "temp"
+
 
 # # Put all order numbers in list
 column = sheet["A"]
+
 order_numbers = []
 for order in column:
     order = order.value
@@ -51,7 +54,6 @@ for order in column:
 order_numbers.remove(None)
 
 # # Cycle through list to find dupes
-
 dupe_orders = []
 for num in order_numbers:
     if num.count("-") > 2:
@@ -69,15 +71,13 @@ while row <= sheet.max_row:
     else:
         row += 1
 
-
 # # Set time and save file
 now = datetime.now()
 dt_string = "/" + now.strftime("%Y%m%d-%H%M") + ".xlsx" # datetime object containing current date and time
 
 wb.save(env_conf.get("ORDER_FOLDER_PATH") + dt_string)
 
-
-# # Upload file to ALPS
+# # Upload file to ALPS (multiline comment the code from here on out if you want to avoid sending the result to alps, i.e. when testing)
 options = Options()
 options.binary_location = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 options.headless = True
@@ -95,13 +95,13 @@ login.click()
 
 time.sleep(3)
 
-button = driver.find_element(
-    By.XPATH, '/html/body/div[3]/header/nav/div[1]/div[1]/i-button')
-button.click()
+driver.find_element(
+    By.XPATH, '/html/body/div[3]/header/nav/div[1]/div[1]/i-button'
+).click()
 
-button = driver.find_element(
-    By.XPATH, '/html/body/div[3]/header/nav/div[3]/div/div[2]/div[7]/div[2]/ul/li/a')
-button.click()
+driver.find_element(
+    By.XPATH, '/html/body/div[3]/header/nav/div[3]/div/div[2]/div[7]/div[2]/ul/li/a'
+).click()
 
 time.sleep(3)
 
@@ -118,5 +118,4 @@ file_upload = driver.find_element(
 )
 
 file_upload.send_keys(env_conf.get("ORDER_FOLDER_PATH") + dt_string)
-
 time.sleep(5)
