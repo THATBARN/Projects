@@ -6,6 +6,7 @@ import time
 from datetime import datetime
 from dotenv import dotenv_values
 from openpyxl import load_workbook
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -30,7 +31,7 @@ order_ids = response.text
 url = "https://admin.bozoraka.com/api/new-market-requests-excel"
 response = requests.post(url, data=order_ids, headers=headers)
 
-new_requests = tempfile.TemporaryFile()
+new_requests = tempfile.NamedTemporaryFile(prefix="alps_")
 new_requests.write(response.content)
 
 # Remove multi-box orders
@@ -47,21 +48,20 @@ order_numbers.remove(None)
 # Cycle through list to find dupes
 dupe_orders = []
 for order in order_numbers:
-    if order.count("-") > 2:  # find order numbers with more than 2 dashes...
+    if order.count("-") > 2:
         dupe_orders.append(order)
-        try:
-            # ...then find corresponding order
-            dupe_orders.append(order[0:-2])
-        except e as ValueError:
-            # FIXME: this should never happen!
-            print("ALERT: Something wrong happened!", e)
-            exit(-1)
+        original_order = order[0:-2]
+        if original_order not in dupe_orders:
+            dupe_orders.append(original_order)
 
+print ("shee count: %d", sheet.max_row)
 # Delete dupe rows
-rows = list(sheet.rows)
-for i in range(len(rows)):
-    if rows[i][0].value in dupe_orders:
-        sheet.delete_rows(i)
+row = 1
+while row <= len(order_numbers):
+    if sheet.cell(row=row, column=1).value in dupe_orders:
+        sheet.delete_rows(row, 1)
+    else:
+        row +=1
 
 now = datetime.now()
 orders_xlsx = now.strftime("%Y%m%d-%H%M") + ".xlsx"
@@ -83,13 +83,13 @@ login.click()
 
 time.sleep(3)
 
-button = driver.find_element(
-    By.XPATH, '/html/body/div[3]/header/nav/div[1]/div[1]/i-button')
-button.click()
+driver.find_element(
+    By.XPATH, '/html/body/div[3]/header/nav/div[1]/div[1]/i-button'
+).click()
 
-button = driver.find_element(
-    By.XPATH, '/html/body/div[3]/header/nav/div[3]/div/div[2]/div[7]/div[2]/ul/li/a')
-button.click()
+driver.find_element(
+    By.XPATH, '/html/body/div[3]/header/nav/div[3]/div/div[2]/div[7]/div[2]/ul/li/a'
+).click()
 
 time.sleep(3)
 
@@ -107,4 +107,6 @@ file_upload = driver.find_element(
 )
 
 file_upload.send_keys(env_conf.get("ORDER_FOLDER_PATH") + orders_xlsx)
+time.sleep(30) # TODO: check the actual page response
+
 print("Done uploading new market requests")
