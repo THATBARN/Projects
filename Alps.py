@@ -54,10 +54,9 @@ for order in order_numbers:
         if original_order not in dupe_orders:
             dupe_orders.append(original_order)
 
-print ("shee count: %d", sheet.max_row)
 # Delete dupe rows
 row = 1
-while row <= len(order_numbers):
+while row <= sheet.max_row:
     if sheet.cell(row=row, column=1).value in dupe_orders:
         sheet.delete_rows(row, 1)
     else:
