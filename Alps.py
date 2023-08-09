@@ -64,8 +64,9 @@ while row <= sheet.max_row:
 
 now = datetime.now()
 orders_xlsx = now.strftime("%Y%m%d-%H%M") + ".xlsx"
-wb.save(env_conf.get("ORDER_FOLDER_PATH") + orders_xlsx)
+wb.save(env_conf.get("ORDER_FOLDER_PATH") + "/" + orders_xlsx)
 
+# Upload to alps
 print("Uploading to ALPS website ...")
 options = Options()
 options.headless = True
@@ -106,6 +107,8 @@ file_upload = driver.find_element(
 )
 
 file_upload.send_keys(env_conf.get("ORDER_FOLDER_PATH") + orders_xlsx)
-time.sleep(30) # TODO: check the actual page response
+
+driver.implicitly_wait(10)
+driver.find_element(By.NAME, '확인')
 
 print("Done uploading new market requests")
